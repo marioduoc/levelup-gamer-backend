@@ -24,11 +24,14 @@ import cl.levelup.backend.excepcion.NoEncontradoException;
 import cl.levelup.backend.excepcion.SolicitudInvalidaException;
 import cl.levelup.backend.repositorio.BoletaRepository;
 import cl.levelup.backend.repositorio.ProductoRepository;
+import cl.levelup.backend.validacion.Validaciones;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class BoletaService {
+
+    public static final double DESCUENTO_DUOC = 0.20;
 
     private static final DateTimeFormatter FORMATO_NUMERO = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -54,7 +57,7 @@ public class BoletaService {
         boleta.setEstado(aprobado ? EstadoBoleta.APROBADA : EstadoBoleta.RECHAZADA);
         copiarDatosEnvio(compra, boleta);
 
-        int total = 0;
+        int subtotal = 0;
         for (Map.Entry<String, Integer> item : agruparItems(compra.items()).entrySet()) {
             Producto producto = productoRepository.buscarParaActualizar(item.getKey())
                     .orElseThrow(() -> new NoEncontradoException("No existe el producto " + item.getKey() + "."));
@@ -71,13 +74,17 @@ public class BoletaService {
             detalle.setPrecioUnitario(producto.precioFinal());
             detalle.setSubtotal(producto.precioFinal() * cantidad);
             boleta.agregarDetalle(detalle);
-            total += detalle.getSubtotal();
+            subtotal += detalle.getSubtotal();
 
             if (aprobado) {
                 producto.setStock(producto.getStock() - cantidad);
             }
         }
-        boleta.setTotal(total);
+        // el descuento depende del correo de la cuenta, no del que se escribe en el checkout
+        int descuento = Validaciones.correoDuoc(usuario.getCorreo()) ? (int) Math.round(subtotal * DESCUENTO_DUOC) : 0;
+        boleta.setSubtotal(subtotal);
+        boleta.setDescuento(descuento);
+        boleta.setTotal(subtotal - descuento);
         return BoletaResponse.de(boletaRepository.save(boleta));
     }
 

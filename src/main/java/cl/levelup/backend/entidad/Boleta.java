@@ -39,6 +39,12 @@ public class Boleta {
     private LocalDateTime fecha;
 
     @Column(nullable = false)
+    private Integer subtotal;
+
+    @Column(nullable = false)
+    private Integer descuento = 0;
+
+    @Column(nullable = false)
     private Integer total;
 
     @Enumerated(EnumType.STRING)

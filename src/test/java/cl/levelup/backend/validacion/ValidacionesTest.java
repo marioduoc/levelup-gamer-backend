@@ -34,6 +34,14 @@ class ValidacionesTest {
     }
 
     @Test
+    void correosConDescuentoDuoc() {
+        assertThat(Validaciones.correoDuoc("ana@duoc.cl")).isTrue();
+        assertThat(Validaciones.correoDuoc("PROFE@profesor.duoc.cl")).isTrue();
+        assertThat(Validaciones.correoDuoc("ana@gmail.com")).isFalse();
+        assertThat(Validaciones.correoDuoc(null)).isFalse();
+    }
+
+    @Test
     void mayorDeEdad() {
         assertThat(Validaciones.mayorDeEdad(LocalDate.now().minusYears(18))).isTrue();
         assertThat(Validaciones.mayorDeEdad(LocalDate.now().minusYears(18).plusDays(1))).isFalse();

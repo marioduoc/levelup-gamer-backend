@@ -59,6 +59,7 @@ class BoletaServiceTest {
     void preparar() {
         cliente = new Usuario();
         cliente.setId(3L);
+        cliente.setCorreo("cliente@gmail.com");
 
         Categoria juegos = new Categoria();
         juegos.setId(1);
@@ -76,11 +77,24 @@ class BoletaServiceTest {
                 new ItemCompraRequest("JM001", 2), new ItemCompraRequest("JM002", 1)));
 
         assertThat(boleta.estado()).isEqualTo(EstadoBoleta.APROBADA);
+        assertThat(boleta.descuento()).isZero();
         assertThat(boleta.total()).isEqualTo(29990 * 2 + 19992);
         assertThat(boleta.detalles()).hasSize(2);
         assertThat(boleta.detalles().get(1).precioUnitario()).isEqualTo(19992);
         assertThat(catan.getStock()).isEqualTo(23);
         assertThat(carcassonne.getStock()).isEqualTo(17);
+    }
+
+    @Test
+    void cuentaDuocTieneVeintePorCientoDeDescuento() {
+        cliente.setCorreo("alumno@duoc.cl");
+        prepararCompra();
+
+        BoletaResponse boleta = boletaService.comprar(3L, compra(TARJETA_OK, new ItemCompraRequest("JM001", 1)));
+
+        assertThat(boleta.subtotal()).isEqualTo(29990);
+        assertThat(boleta.descuento()).isEqualTo(5998);
+        assertThat(boleta.total()).isEqualTo(23992);
     }
 
     @Test

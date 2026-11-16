@@ -43,6 +43,11 @@ public final class Validaciones {
                 && DOMINIOS_CORREO.contains(partes[1].toLowerCase());
     }
 
+    // correos con descuento del 20 %
+    public static boolean correoDuoc(String correo) {
+        return correo != null && correo.toLowerCase().matches(".+@(duoc\\.cl|profesor\\.duoc\\.cl)$");
+    }
+
     public static boolean mayorDeEdad(LocalDate fechaNacimiento) {
         return fechaNacimiento != null
                 && Period.between(fechaNacimiento, LocalDate.now()).getYears() >= 18;
