@@ -1,0 +1,30 @@
+name: levelup
+
+# despliegue en EC2 reutilizando un MySQL que ya corre en otro compose
+# la base levelup se crea una vez con los scripts de db/
+services:
+  backend:
+    build: .
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:mysql://${DB_HOST}:3306/levelup
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JAVA_OPTS: -Xms96m -Xmx320m
+    networks:
+      - default
+      - bd
+
+  frontend:
+    build: ../levelup-gamer-react
+    restart: unless-stopped
+    ports:
+      - "${PUERTO_WEB:-80}:80"
+    depends_on:
+      - backend
+
+networks:
+  bd:
+    external: true
+    name: ${RED_BD}
