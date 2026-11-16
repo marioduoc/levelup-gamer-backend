@@ -31,7 +31,7 @@ public class JwtService {
             @Value("${jwt.secret}") String secreto,
             @Value("${jwt.access-minutos}") long accessMinutos,
             @Value("${jwt.refresh-dias}") long refreshDias) {
-        // HS256 exige una clave de al menos 256 bits (32 bytes)
+        // jjwt elige HS256, HS384 o HS512 según el largo de la clave (mínimo 32 bytes)
         this.clave = Keys.hmacShaKeyFor(secreto.getBytes(StandardCharsets.UTF_8));
         this.duracionAccess = Duration.ofMinutes(accessMinutos);
         this.duracionRefresh = Duration.ofDays(refreshDias);
