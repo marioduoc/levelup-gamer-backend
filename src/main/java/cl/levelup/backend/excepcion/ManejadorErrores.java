@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -59,8 +62,17 @@ public class ManejadorErrores {
         return responder(HttpStatus.CONFLICT, "La operación viola una restricción de la base de datos.");
     }
 
+    @ExceptionHandler(NoAutenticadoException.class)
+    public ResponseEntity<ErrorResponse> noAutenticado(NoAutenticadoException e) {
+        return responder(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> accesoDenegado(AccessDeniedException e) {
+        Authentication actual = SecurityContextHolder.getContext().getAuthentication();
+        if (actual == null || actual instanceof AnonymousAuthenticationToken) {
+            return responder(HttpStatus.UNAUTHORIZED, "Debes iniciar sesión.");
+        }
         return responder(HttpStatus.FORBIDDEN, "No tienes permisos para realizar esta acción.");
     }
 
